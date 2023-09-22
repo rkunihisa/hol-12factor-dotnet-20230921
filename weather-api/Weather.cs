@@ -28,7 +28,7 @@ public static class Weather
         {
             temperature = "+2 ℃",
             wind = "62 km/h",
-            description = "Sunny",
+            description = "Rainy",
             forecast = new List<object>
             {
                 new { day = "1", temperature = "-6 ℃", wind = "63 km/h" },

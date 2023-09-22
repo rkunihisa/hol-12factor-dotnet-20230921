@@ -1,12 +1,22 @@
-﻿var builder = WebApplication.CreateBuilder(args);
+﻿// using Azure.Identity;
+// using Azure.Security.KeyVault.Secrets;
+// using Azure.Core;
+
+var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddRazorPages();
 
 builder.Services.AddDbContext<TFAppContext>(options =>
-    options.UseInMemoryDatabase(builder.Configuration.GetConnectionString("TFAppContext")));
+    options.UseSqlServer(builder.Configuration.GetConnectionString("TFAppContext")));
 
-builder.Services.AddDistributedMemoryCache();
+// 4-分散 Redis キャッシュを用いたセッション構成への変更にてコメントアウト
+// builder.Services.AddDistributedMemoryCache();
+builder.Services.AddStackExchangeRedisCache(options =>
+{
+    options.Configuration = builder.Configuration.GetConnectionString("RedisConnection");
+    options.InstanceName = builder.Environment.EnvironmentName.ToLower();
+});
 
 // セッションの設定
 builder.Services.AddSession(options =>
@@ -15,6 +25,13 @@ builder.Services.AddSession(options =>
     options.Cookie.HttpOnly = true;
     options.Cookie.IsEssential = true;
 });
+
+builder.Services.AddHttpClient("weather", httpClient =>
+{
+    httpClient.BaseAddress = new Uri("https://fnappqzwxqco6txeh4.azurewebsites.net/");
+});
+
+builder.Services.AddHttpContextAccessor();
 
 var app = builder.Build();
 
